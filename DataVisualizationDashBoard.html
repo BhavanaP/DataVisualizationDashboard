@@ -1,0 +1,125 @@
+<html>
+<head>
+    <title>College Salary Dashboard</title>
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+        // It's recommended to specify the chart packages, even though it may not be necessary for ChartWrappers. 
+        google.load('visualization', '1.0', { 'packages': ['controls', 'map', 'table', 'corechart'] });
+        google.setOnLoadCallback(queryData);
+
+        // Send query to the Google Spreadsheet that contains the housing data.  
+        function queryData() {
+            var query = new google.visualization.Query(
+                'https://docs.google.com/spreadsheets/d/1NEIGkGLY6VSK_y_1hxhv3AoptcCTeRAYr-qXjsV8O3E/edit#gid=366977738/gviz/tq?tq=');
+            // Here we get the whole spreadseet.
+            query.send(handleQueryResponse);
+        }
+
+        // Callback function that receives data from the Google Spreadsheet
+        function handleQueryResponse(response) {
+            if (response.isError()) {
+                alert('Error in query: ' + response.getMessage() + ' '
+                 + response.getDetailedMessage());
+                return;
+            }
+
+            // If there is no error, retrieve data from the Google Spreadsheet response. 
+            var dataTable = response.getDataTable();
+            // Sort by the first column. 
+            dataTable.sort([{ column: 0 }]);
+
+            // Create a DataView object for chart #1
+            var dataView1 = new google.visualization.DataView(dataTable);
+            // Select and rearrange the columns for more user friendly viewing. 
+            dataView1.setColumns([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]);
+
+            // Create an empty ChartWrapper and set its properties
+            var chart1 = new google.visualization.ChartWrapper();
+            chart1.setChartType('Table');
+            chart1.setContainerId('chart1_div');
+            // To set a DataView for the ChartWrapper, use DataView.toJSON()function. 
+            // There is a no need to set DataTable for the ChartWrapper. 
+            chart1.setView(dataView1.toJSON());
+
+            // Don't draw the chart here. It will be drawn when the dashboard is drawn. 
+
+            // Create a DataView for the chart #2
+            var dataView2 = new google.visualization.DataView(dataTable);
+            dataView2.setColumns([4,12]);
+
+            var chart2 = new google.visualization.ChartWrapper();
+            chart2.setChartType('ScatterChart');
+            chart2.setContainerId('chart2_div');
+            chart2.setView(dataView2.toJSON());
+
+            // Create a DataView for the chart #3
+            var dataView3 = new google.visualization.DataView(dataTable);
+            dataView3.setColumns([3,4,7]);
+
+            var chart3 = new google.visualization.ChartWrapper();
+            chart3.setChartType('ColumnChart');
+            chart3.setContainerId('chart3_div');
+            chart3.setView(dataView3.toJSON());
+
+            // Create filters
+            var priceFilter = new google.visualization.ControlWrapper();
+            // What type of filter is this?
+            priceFilter.setControlType('NumberRangeFilter');
+            priceFilter.setContainerId('vender_filter_div');
+            // Must associate this filter to a column. 
+            priceFilter.setOption('filterColumnLabel', 'Federal_ID_number');
+
+            var sqftFilter = new google.visualization.ControlWrapper();
+            sqftFilter.setControlType('NumberRangeFilter');
+            sqftFilter.setContainerId('sqft_filter_div');
+            sqftFilter.setOption('filterColumnLabel', 'Average_salary_full_professors');
+
+            var bedroomFilter = new google.visualization.ControlWrapper();
+            bedroomFilter.setControlType('NumberRangeFilter');
+            bedroomFilter.setContainerId('bedroom_filter_div');
+            bedroomFilter.setOption('filterColumnLabel', 'Average_salary_associate_professors');
+
+            // Create and draw the dashboard
+            var dashboard = new google.visualization.Dashboard(document.getElementById('dashboard_div'));
+
+            // Bind the filters to charts. These filters and charts now become part of this dashboard. 
+            dashboard.bind([priceFilter, sqftFilter, bedroomFilter],
+                           [chart1, chart2, chart3]);
+
+            // Draw all the charts and filters in this dashboard. 
+            dashboard.draw(dataTable);
+
+        }
+    </script>
+</head
+<body>
+    <h2>College salary Dashboard</h2>
+    <div id="dashboard_div">
+        <table>
+            <tr>
+                <td>
+                    
+                    
+                    <div id="vender_filter_div" style="width: 250px">
+                    </div>
+                    <div id="sqft_filter_div" style="width: 250px">
+                    </div>
+                    <div id="bedroom_filter_div" style="width: 250px">
+                    </div>
+                    
+                </td>
+                <td>
+                    <div id="chart1_div" style="height: 200px; width: 1000px; border-style: groove;">
+                    </div>
+                    <br />
+                    <div id="chart2_div" style="height: 200px; width: 1000px; border-style: groove;">
+                    </div>
+                    <br />
+                    <div id="chart3_div" style="height: 200px; width: 1000px; border-style: groove;">
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
